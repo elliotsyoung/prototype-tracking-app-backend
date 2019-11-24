@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Gardeneur Pickup Tracking Prototype</title>
+    <style>
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var truck_marker = null;
+        var map;
+        var infoWindow
+        var socket;
+        function initMap() {
+            infoWindow = new google.maps.InfoWindow({
+                        content: "Gardeneur Pickup Vehicle"
+                    });
+            map = new google.maps.Map(document.getElementById('map'), {
+                
+                center: {lat: 37.30114814609655, lng: -122.01151746363024},
+                zoom: 13
+            });
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+
+                    map.setCenter(pos);
+                }, function () {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+
+            map.addListener('click', function (e) {
+                function placeMarkerAndPanTo(latLng, map) {
+                    var marker = new google.maps.Marker({
+                        position: latLng,
+                        map: map
+                    });
+                    // map.panTo(latLng);
+                }
+                if (truck_marker) {
+                    console.log("moving truck marker");
+                    truck_marker.setPosition(e.latLng)
+                    infoWindow.open(map, truck_marker);
+                } else {
+                    console.log("creating truck marker");
+                    var truck_icon = {
+                        url: "/truck_icon.png", // url
+                        scaledSize: new google.maps.Size(50, 50), // scaled size
+                        origin: new google.maps.Point(0, 0), // origin
+                        anchor: new google.maps.Point(25, 25) // anchor
+                    };
+                    truck_marker = new google.maps.Marker({
+                        position: e.latLng,
+                        map: map,
+                        icon: truck_icon
+                    });
+                    infoWindow.open(map, truck_marker);
+                }
+                // placeMarkerAndPanTo(e.latLng, map);
+                // truck_marker.setPosition(e.latLng);
+                console.log(e.latLng);
+                socket.emit("truck-position-update", e);
+            });
+
+
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDB2WL9PmzImUSRbZTqX1pzR9_EUVaNTzw&callback=initMap"
+        async defer></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marker-animate-unobtrusive/0.2.8/vendor/markerAnimate.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marker-animate-unobtrusive/0.2.8/SlidingMarker.min.js"></script>
+    <script src="jquery.easing.1.3.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>
