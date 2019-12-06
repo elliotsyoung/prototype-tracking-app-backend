@@ -2,9 +2,9 @@
   "name": "gardeneur-tracking-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "tracking_server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon tracking_server.js"
   },
   "keywords": [],
   "author": "",
